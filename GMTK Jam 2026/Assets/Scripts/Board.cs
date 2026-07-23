@@ -10,6 +10,7 @@ public enum GenerationScheme
 
 public class Board
 {
+    
     public Dictionary<Vector2Int, GridSquare> Cells = new();
     private int _width, _height;
     private float _cellSize;
@@ -43,12 +44,12 @@ public class Board
             {
                 
                 Vector2Int position = new Vector2Int(x, y);
-                Debug.Log(position);
                 Cells.Add(position, new GridSquare(position));
                 Cells[position].SetType(GridSqaureType.BASIC);
             }
         }
 
+        /*
         Cells[new Vector2Int(0, 0)].SetType(GridSqaureType.START);
         List<GridSquare> goalSquares = new();
         while (goalSquares.Count < 1)
@@ -58,7 +59,7 @@ public class Board
             goalSquares.Add(candidate);
             candidate.SetType(GridSqaureType.GOAL);
         }
-
+        */
     }
 
     public List<GridSquare> GetNeighbours(GridSquare cell, int range = 1)
@@ -117,8 +118,8 @@ public class Board
     {
         int x = Mathf.FloorToInt(worldPosition.x + (_cellSize * Width * 0.5f) / _cellSize);
         int y = Mathf.FloorToInt(worldPosition.z + (_cellSize * Height * 0.5f) / _cellSize);
-        x = Mathf.Clamp(x, 0, Width - 1);
-        y = Mathf.Clamp(y, 0, Height -1);
+        //x = Mathf.Clamp(x, 0, Width - 1);
+       // y = Mathf.Clamp(y, 0, Height -1);
         return new Vector2Int(x, y);
     }
 }

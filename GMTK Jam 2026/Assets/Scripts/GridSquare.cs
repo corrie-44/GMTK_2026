@@ -1,6 +1,6 @@
 using UnityEngine;
-using System; 
-
+using System;
+using System.Collections.Generic; 
 public enum GridSqaureType
 {
     EMPTY,
@@ -24,7 +24,18 @@ public class GridSquare
 
     public GridSquareVisual Visual;
 
-    public TimeBundle bundle; 
+    public List<TimeBundle> Bundles = new(); 
+    public TimeBundle bundle => GetBundle();
+
+    public string Element;
+
+    public int GoalValue = -1; 
+
+    TimeBundle GetBundle()
+    {
+        if (Bundles.Count == 0) return null;
+        return Bundles[0];
+    }
 
     public GridSquare(Vector2Int gridPosition)
     {
@@ -35,5 +46,6 @@ public class GridSquare
     {
         _squareType = type;
         OnSquareUpdated?.Invoke(this);
+        if (type == GridSqaureType.GOAL) int.TryParse(Element.Substring(1), out GoalValue);
     }
 }
