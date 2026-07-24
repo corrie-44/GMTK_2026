@@ -122,6 +122,13 @@ public class TimeBundle : MonoBehaviour
         BundleData.GridPosition = pathInfo.Nodes[i + 1].Square.GridPosition; 
     }
 
+    public void SetTime(float time)
+    {
+        BundleData.Time = time;
+        UpdateTime();
+        
+    }
+
     public void AddTime(float time)
     {
         BundleData.Time += time;

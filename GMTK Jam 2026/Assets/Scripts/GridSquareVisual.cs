@@ -2,7 +2,6 @@ using UnityEngine;
 using MoreMountains.Feedbacks;
 using UnityEngine.EventSystems;
 using TMPro;
-using MoreMountains.Feedbacks; 
 public class GridSquareVisual : MonoBehaviour
 {
     private GridSquare _gridSqaure;
@@ -12,6 +11,7 @@ public class GridSquareVisual : MonoBehaviour
     [SerializeField] private TMP_Text goalText;
     [SerializeField] private GameObject goalParent;
     [SerializeField] private Transform diodeVisual;
+    [SerializeField] private GameObject splitterVisual; 
     [SerializeField] private MMF_Player diodeFeedbacks; 
 
     public void Init(GridSquare gridSquare)
@@ -21,18 +21,19 @@ public class GridSquareVisual : MonoBehaviour
         _gridSqaure.Visual = this;
         goalParent.SetActive(false);
         diodeVisual.gameObject.SetActive(false);
+        splitterVisual.SetActive(false);
     }
 
 
     public void UpdateSquareVisual(GridSquare square)
     {
-        if(GridSquare.SquareType == GridSqaureType.GOAL)
+        if(GridSquare.SquareType == GridSquareType.GOAL)
         {
             goalText.text = square.Element.Substring(1);
             goalParent.SetActive(true);
         }
 
-        if(GridSquare.SquareType == GridSqaureType.DIODE)
+        if(GridSquare.SquareType == GridSquareType.DIODE)
         {
             //Quaternion forwardRot = Quaternion.LookRotation(new Vector3(GridSquare.DiodeDirection.x, 0, GridSquare.DiodeDirection.y), Vector3.down);
             Vector3 dir = new Vector3(GridSquare.DiodeDirection.x, 0, GridSquare.DiodeDirection.y);
@@ -40,6 +41,11 @@ public class GridSquareVisual : MonoBehaviour
             Quaternion fromTo = Quaternion.FromToRotation(diodeVisual.forward, dir);
             diodeVisual.rotation *= fromTo; 
             diodeVisual.gameObject.SetActive(true);
+        }
+
+        if(GridSquare.SquareType == GridSquareType.SPLITTER)
+        {
+            splitterVisual.SetActive(true);
         }
     }
 

@@ -161,24 +161,24 @@ public class BoardManager : Singleton<BoardManager>
 
                 if (square.Element.Contains("*"))
                 {
-                    square.SetType(GridSqaureType.GOAL);
+                    square.SetType(GridSquareType.GOAL);
                 }
 
                 if (square.Element.Contains("%")) //Special Tile
                 {
                     if(square.Element.Substring(1, 1) == "d")
                     {
-                        square.SetType(GridSqaureType.DIODE);
+                        square.SetType(GridSquareType.DIODE);
                     }
 
                     if(square.Element.Substring(1,1) == "s")
                     {
-                        square.SetType(GridSqaureType.SPLITTER);
+                        square.SetType(GridSquareType.SPLITTER);
                     }
 
                     if(square.Element.Substring(1,1) == "g")
                     {
-                        square.SetType(GridSqaureType.GATE);
+                        square.SetType(GridSquareType.GATE);
                     }
                 }
             }
@@ -323,7 +323,7 @@ public class BoardManager : Singleton<BoardManager>
                 }
 
                 //Don't go over wrong direction diodes
-                if (_hoverSquare.SquareType == GridSqaureType.DIODE)
+                if (_hoverSquare.SquareType == GridSquareType.DIODE)
                 {
                     Vector2Int delta = _hoverSquare.GridPosition - lastSquare.GridPosition;
                     if (Vector2.Dot(delta, _hoverSquare.DiodeDirection) <= 0)
@@ -394,13 +394,11 @@ public class BoardManager : Singleton<BoardManager>
                 }
 
                 MergeCheck();
+                SplitterCheck(); 
 
                 timer = 0;
                 index++; 
             }
-
-
-            
         }
     }
 
@@ -427,6 +425,35 @@ public class BoardManager : Singleton<BoardManager>
         }
     }
 
+    void SplitterCheck()
+    {
+        List<GridSquare> splitterSquares = Board.Cells.Values.Where(s => s.SquareType == GridSquareType.SPLITTER).ToList();
+        List<int> IDs = new(); 
+        foreach(GridSquare square in splitterSquares)
+        {
+            foreach (GridSquare otherSquare in splitterSquares)
+            {
+                if (square == otherSquare) continue;
+                if (IDs.Contains(square.SplitterID) || IDs.Contains(otherSquare.SplitterID)) continue;
+
+                if (square.bundle != null && otherSquare.bundle != null)
+                {
+                    if (square.SplitterID == otherSquare.SplitterID)
+                    {
+                        IDs.Add(square.SplitterID);
+                        //Split time values 
+                        float avg = Mathf.Floor((square.bundle.BundleData.Time + otherSquare.bundle.BundleData.Time) / 2);
+                        square.bundle.Eat();
+                        square.bundle.SetTime(avg);
+
+                        otherSquare.bundle.Eat();
+                        otherSquare.bundle.SetTime(avg);
+                    }
+                }
+            }
+        }
+    }
+
     void LevelBeaten()
     {
         _isPlaying = false;
@@ -443,7 +470,7 @@ public class BoardManager : Singleton<BoardManager>
     int GameStatus()
     {
         int status = 0; //0: game continues, 1: victory, -1: fail state 
-        int numGoalSquares = Board.Cells.Values.Where(s => s.SquareType == GridSqaureType.GOAL).Count();
+        int numGoalSquares = Board.Cells.Values.Where(s => s.SquareType == GridSquareType.GOAL).Count();
        
         //If there are more bundles alive than there are goals, the game is still going
         if (TimeBundles.Where(t => t.Alive).Count() > numGoalSquares) return 0;
@@ -454,7 +481,7 @@ public class BoardManager : Singleton<BoardManager>
         int numGoalsSatisfied = 0; 
         foreach (GridSquare square in Board.Cells.Values)
         {
-            if(square.SquareType == GridSqaureType.GOAL && square.Bundles.Count > 0)
+            if(square.SquareType == GridSquareType.GOAL && square.Bundles.Count > 0)
             {
                 foreach(TimeBundle tb in square.Bundles)
                 {

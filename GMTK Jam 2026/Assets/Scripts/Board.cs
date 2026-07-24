@@ -45,7 +45,7 @@ public class Board
                 
                 Vector2Int position = new Vector2Int(x, y);
                 Cells.Add(position, new GridSquare(position));
-                Cells[position].SetType(GridSqaureType.BASIC);
+                Cells[position].SetType(GridSquareType.BASIC);
             }
         }
 
