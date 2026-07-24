@@ -7,7 +7,11 @@ public enum GridSqaureType
     BASIC,
     START,
     GOAL,
-    FEATURE
+    DIODE,
+    GATE,
+    SPLITTER,
+    COLORCHANGER,
+    STRAYTIME
 }
 
 public class GridSquare
@@ -29,7 +33,8 @@ public class GridSquare
 
     public string Element;
 
-    public int GoalValue = -1; 
+    public int GoalValue = -1;
+    public Vector2Int DiodeDirection = Vector2Int.zero; 
 
     TimeBundle GetBundle()
     {
@@ -45,7 +50,31 @@ public class GridSquare
     public void SetType(GridSqaureType type)
     {
         _squareType = type;
-        OnSquareUpdated?.Invoke(this);
+        
         if (type == GridSqaureType.GOAL) int.TryParse(Element.Substring(1), out GoalValue);
+
+        if(type == GridSqaureType.DIODE)
+        {
+            string compassDirection = Element.Substring(2, 1);
+            switch (compassDirection)
+            {
+                case "N":
+                    DiodeDirection = new Vector2Int(0,1); 
+                    break;
+                case "E":
+                    DiodeDirection = new Vector2Int(-1, 0);
+                    break;
+                case "S":
+                    DiodeDirection = new Vector2Int(0, -1);
+                    break;
+                case "W":
+                    DiodeDirection = new Vector2Int(1, 0);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        OnSquareUpdated?.Invoke(this);
     }
 }

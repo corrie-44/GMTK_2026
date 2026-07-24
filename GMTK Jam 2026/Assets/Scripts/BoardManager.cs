@@ -163,6 +163,24 @@ public class BoardManager : Singleton<BoardManager>
                 {
                     square.SetType(GridSqaureType.GOAL);
                 }
+
+                if (square.Element.Contains("%")) //Special Tile
+                {
+                    if(square.Element.Substring(1, 1) == "d")
+                    {
+                        square.SetType(GridSqaureType.DIODE);
+                    }
+
+                    if(square.Element.Substring(1,1) == "s")
+                    {
+                        square.SetType(GridSqaureType.SPLITTER);
+                    }
+
+                    if(square.Element.Substring(1,1) == "g")
+                    {
+                        square.SetType(GridSqaureType.GATE);
+                    }
+                }
             }
         }
 
@@ -285,6 +303,9 @@ public class BoardManager : Singleton<BoardManager>
         {
             if (_hoverSquare.Element == "0") return; 
             if (_activePath.LastNode == null) return; 
+
+            
+
             if (Board.GetOrthogonalNeighbours(_activePath.LastNode.Square).Contains(_hoverSquare))
             {
                 //Erase if retracing steps 
@@ -299,6 +320,17 @@ public class BoardManager : Singleton<BoardManager>
                 if (_activePath.Nodes.Any(n => n.Square == _hoverSquare))
                 {
                     return;
+                }
+
+                //Don't go over wrong direction diodes
+                if (_hoverSquare.SquareType == GridSqaureType.DIODE)
+                {
+                    Vector2Int delta = _hoverSquare.GridPosition - lastSquare.GridPosition;
+                    if (Vector2.Dot(delta, _hoverSquare.DiodeDirection) <= 0)
+                    {
+                        _hoverSquare.Visual.DiodeBump(); 
+                        return;
+                    }
                 }
 
                 _activePath.AddNode(_hoverSquare);
