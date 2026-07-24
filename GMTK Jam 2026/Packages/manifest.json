@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.ssmasrour.bobbin": "https://github.com/ssmasrour/Google-Sheets-to-Unity.git?path=/com.ssmasrour.bobbin",
     "com.unity.ai.navigation": "2.0.8",
     "com.unity.cinemachine": "3.1.7",
     "com.unity.collab-proxy": "2.13.3",

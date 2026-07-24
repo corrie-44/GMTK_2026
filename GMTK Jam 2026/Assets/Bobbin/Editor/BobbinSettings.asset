@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4230f1ebc2a828243ac1290275d26bd7, type: 3}
+  m_Name: BobbinSettings
+  m_EditorClassIdentifier: 
+  paths:
+  - m_ID: 0
+    m_Name: root
+    m_Depth: -1
+    enabled: 0
+    fileType: 0
+    initUrl: 
+    url: root
+    filePath: 
+    lastFileHash: 
+    label: 
+    sheetId: 
+    assetReference: {fileID: 0}
+  - m_ID: 14
+    m_Name: Debug Lvels
+    m_Depth: 0
+    enabled: 1
+    fileType: 1
+    initUrl: https://docs.google.com/spreadsheets/d/1TRSMRwr6V_CCrmjGE9m_c3Nwua9a4Cu5vmQC9Sq5YxU/edit?usp=sharing
+    url: https://docs.google.com/spreadsheets/d/1TRSMRwr6V_CCrmjGE9m_c3Nwua9a4Cu5vmQC9Sq5YxU/edit?usp=sharing
+    filePath: Assets/Level Data/Debug Lvels.csv
+    lastFileHash: dc7b22be5e8fed7e42ddcbe5c511f40f
+    label: 
+    sheetId: '#gid=1902804661'
+    assetReference: {fileID: 4900000, guid: 875432268cd33084bb37d5fc920f7f9d, type: 3}
+  - m_ID: 13
+    m_Name: Google Docs Example
+    m_Depth: 0
+    enabled: 1
+    fileType: 0
+    initUrl: https://docs.google.com/document/d/16qV96pKt5sQp49fxx0Y_RHcSb2makAAOBHGxwa__0XU/edit
+    url: https://docs.google.com/document/d/16qV96pKt5sQp49fxx0Y_RHcSb2makAAOBHGxwa__0XU/edit
+    filePath: 
+    lastFileHash: 
+    label: 
+    sheetId: 
+    assetReference: {fileID: 0}
+  - m_ID: 9
+    m_Name: Google Sheets Example
+    m_Depth: 0
+    enabled: 1
+    fileType: 1
+    initUrl: https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+    url: https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+    filePath: Assets/Example Files/Google Sheets Example.csv
+    lastFileHash: f6ec9d52e21cb67b8694f6e01006a084
+    label: 
+    sheetId: 
+    assetReference: {fileID: 4900000, guid: 9dbeceb601a49724a8fbd236f2c18e91, type: 3}
+  autoRefresh: 1
+  refreshInterval: 120
+  requestTimeoutSeconds: 30

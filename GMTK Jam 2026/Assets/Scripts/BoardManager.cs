@@ -101,6 +101,9 @@ public class BoardManager : Singleton<BoardManager>
 
     public void CreateLevel(int index)
     {
+#if UNITY_EDITOR
+        _levels = LevelReader.GetLevels(levelData);
+#endif
         _isPlaying = false; 
         _activeLevelIndex = index; 
 

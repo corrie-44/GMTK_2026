@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.ssmasrour.bobbin": {
+      "version": "https://github.com/ssmasrour/Google-Sheets-to-Unity.git?path=/com.ssmasrour.bobbin",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "458a709e6a425dce950f021349b3e0755a433791"
+    },
     "com.unity.ai.navigation": {
       "version": "2.0.8",
       "depth": 0,
