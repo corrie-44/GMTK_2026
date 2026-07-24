@@ -2,7 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using TMPro;
-using MoreMountains.Feedbacks; 
+using MoreMountains.Feedbacks;
+using UnityEngine.UI; 
 public class TimeBundleData
 {
     public float Time;
@@ -28,6 +29,7 @@ public class TimeBundle : MonoBehaviour
     public PathInfo pathInfo;
     public TMP_Text timeDisplayText;
     public Renderer rend;
+    public Image Image; 
     public GameObject visual;
     public MMF_Player eatFeedback; 
 
@@ -38,9 +40,12 @@ public class TimeBundle : MonoBehaviour
     private void Start()
     {
         timeDisplayText.text = BundleData.Time.ToString();
+        Image.color = priorityColors[BundleData.Priority];
         rend.material.color = priorityColors[BundleData.Priority];
         lineRend.startColor = priorityColors[BundleData.Priority];
+        lineRend.endColor = priorityColors[BundleData.Priority];
         lineRend.gameObject.SetActive(false);
+        //lineRend.material.SetFloat("_Offset", BundleData.Priority);
     }
 
     private void Update()
@@ -59,7 +64,11 @@ public class TimeBundle : MonoBehaviour
         var foo = pathInfo.Nodes.ToArray();
         for (int i = 0; i < foo.Length; i++)
         {
-            Vector3 pos = BoardManager.Instance.Board.GridToWorldPosition(foo[i].GridPosition) + Vector3.up * 0.1f;
+            float offsetAmt = (float)BoardManager.Instance.TimeBundles.IndexOf(this) / ((float)BoardManager.Instance.TimeBundles.Count - 1);
+            float t = Mathf.Lerp(-1, 1, offsetAmt);
+            Vector3 offsetVector = (Vector3.forward + Vector3.right).normalized * t * 0.1f;
+            Vector3 upVector = Vector3.up * 0.1f * (BundleData.Priority+1) / 7f; 
+            Vector3 pos = BoardManager.Instance.Board.GridToWorldPosition(foo[i].Square.GridPosition) + upVector + offsetVector;
             lineRend.SetPosition(i, pos);
         }
     }
@@ -74,10 +83,10 @@ public class TimeBundle : MonoBehaviour
         for (int i = 0; i < pathInfo.Nodes.Count - 1; i++)
         {
             yield return StartCoroutine(MoveCoroutine(
-                pathInfo.Nodes[i].Visual.transform.position,
-                pathInfo.Nodes[i + 1].Visual.transform.position));
-            pathInfo.Nodes[i].Bundles.Remove(this);
-            pathInfo.Nodes[i + 1].Bundles.Add(this);
+                pathInfo.Nodes[i].Square.Visual.transform.position,
+                pathInfo.Nodes[i + 1].Square.Visual.transform.position));
+            pathInfo.Nodes[i].Square.Bundles.Remove(this);
+            pathInfo.Nodes[i + 1].Square.Bundles.Add(this);
         }
     }
 
@@ -97,8 +106,8 @@ public class TimeBundle : MonoBehaviour
     {
         if (pathInfo == null || pathInfo.Nodes.Count == 0) return; 
         if (i >= pathInfo.Nodes.Count - 1) return;
-        Vector3 start = pathInfo.Nodes[i].Visual.transform.position;
-        Vector3 end = pathInfo.Nodes[i + 1].Visual.transform.position;
+        Vector3 start = pathInfo.Nodes[i].Square.Visual.transform.position;
+        Vector3 end = pathInfo.Nodes[i + 1].Square.Visual.transform.position;
         transform.position = Vector3.Lerp(start, end, t);
     }
 
@@ -106,11 +115,11 @@ public class TimeBundle : MonoBehaviour
     {
         if (pathInfo == null || pathInfo.Nodes.Count == 0) return;
         if (i >= pathInfo.Nodes.Count - 1) return;
-        pathInfo.Nodes[i].Bundles.Remove(this);
-        pathInfo.Nodes[i + 1].Bundles.Add(this);
+        pathInfo.Nodes[i].Square.Bundles.Remove(this);
+        pathInfo.Nodes[i + 1].Square.Bundles.Add(this);
         //pathInfo.Nodes[i].bundle = null;
         //pathInfo.Nodes[i + 1].bundle = this;
-        BundleData.GridPosition = pathInfo.Nodes[i + 1].GridPosition; 
+        BundleData.GridPosition = pathInfo.Nodes[i + 1].Square.GridPosition; 
     }
 
     public void AddTime(float time)

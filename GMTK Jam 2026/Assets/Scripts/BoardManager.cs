@@ -3,17 +3,55 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using UnityEngine.Events; 
+
+public class PathNode
+{
+    public GridSquare Square; 
+    public PathNode From;
+    public PathNode To; 
+    public PathNode(GridSquare square, PathNode from)
+    {
+        Square = square;
+        From = from;
+    }
+}
+
 public class PathInfo
 {
     public TimeBundle PathBundle;
-    public List<GridSquare> Nodes;
-    public GridSquare LastNode => Nodes[Nodes.Count - 1];
+    public List<PathNode> Nodes;
+    public PathNode LastNode => Last();
+    public PathNode SecondLast => Last(2);
 
     public PathInfo(TimeBundle bundle, GridSquare startSquare)
     {
         PathBundle = bundle;
         Nodes = new();
-        Nodes.Add(startSquare);
+        AddNode(startSquare);
+    }
+
+    public void AddNode(GridSquare square)
+    {
+        PathNode node = new PathNode(square, Last());
+        if (LastNode != null) LastNode.To = node;
+        Nodes.Add(node);
+    }
+
+    public void RemoveNodeFrom(GridSquare square)
+    {
+        int index = Nodes.FindIndex(n => n.Square == square);
+        if(index >= 0)
+        {
+            int range = Nodes.Count - index;
+            Nodes.RemoveRange(index, range);
+        }
+        
+    }
+
+    private PathNode Last(int from = 1)
+    {
+        if (Nodes.Count < from) return null;
+        return Nodes[Nodes.Count - from];
     }
 }
 
@@ -141,6 +179,7 @@ public class BoardManager : Singleton<BoardManager>
     {
         StopAllCoroutines();
         _activeLevelIndex = _activeLevelIndex + 1;
+        _activeLevelIndex = Mathf.Min(_activeLevelIndex, _levels.Count - 1);
         if (_activeLevelIndex >= _levels.Count) return; 
         CreateLevel(_activeLevelIndex);
     }
@@ -158,13 +197,48 @@ public class BoardManager : Singleton<BoardManager>
 
         if (Input.GetMouseButtonDown(0))
         {
-            if(_hoverSquare != null && _hoverSquare.bundle != null)
+            if(_hoverSquare != null && _hoverSquare.bundle != null) //If you click on a bundle
             {
                 _drawingPath = true;
                 _activePath = new PathInfo(_hoverSquare.bundle, _hoverSquare);
                 _hoverSquare.bundle.pathInfo = _activePath;
                 _activePath.PathBundle.UpdatePath(_activePath);
             }
+            else if (_hoverSquare != null && _hoverSquare.bundle == null) //If you click on a path
+            {
+                List<TimeBundle> bundlesWithPaths = new(); 
+                foreach (TimeBundle tb in TimeBundles)
+                {
+                    if (tb == null) continue;
+                    if (tb.pathInfo == null) continue;
+                    if (tb.pathInfo.Nodes.Count < 1) continue;
+                    if (tb.pathInfo.Nodes.Exists(n => n.Square == _hoverSquare))
+                    {
+                        bundlesWithPaths.Add(tb); 
+                        
+                    }
+                }
+
+                if(bundlesWithPaths.Count == 1)
+                {
+                    _activePath = bundlesWithPaths[0].pathInfo;
+                    _drawingPath = true;
+                    _activePath.RemoveNodeFrom(_hoverSquare);
+                    _activePath.AddNode(_hoverSquare);
+                    _activePath.PathBundle.UpdatePath(_activePath);
+                }
+                else if(bundlesWithPaths.Count > 1)
+                {
+                    _activePath = bundlesWithPaths.OrderBy(n => n.BundleData.Priority).ToList()[0].pathInfo;
+                    _drawingPath = true;
+                    _activePath.RemoveNodeFrom(_hoverSquare);
+                    _activePath.AddNode(_hoverSquare);
+                    _activePath.PathBundle.UpdatePath(_activePath);
+                }
+                
+            }
+
+            
         }
 
         if (Input.GetMouseButtonUp(0))
@@ -182,32 +256,57 @@ public class BoardManager : Singleton<BoardManager>
         bool valid = Board.Cells.TryGetValue(Board.WorldToGridPosition(intersectPoint), out GridSquare square);
         // GridSquareVisual visual = Board.Cells[Board.WorldToGridPosition(intersectPoint)].Visual;
 
-        if (!valid) return; 
+        if (!valid)
+        {
+            if (_hoverSquare != null && _hoverSquare.Visual != null)
+               _hoverSquare.Visual.SetHover(false);
+            _hoverSquare = null; 
+            return;
+        }
         if(square != _hoverSquare)
         {
             if(_hoverSquare != null && _hoverSquare.Visual != null)
                 _hoverSquare.Visual.SetHover(false);
 
+            GridSquare lastSquare = _hoverSquare; 
             //if (_hoverSquare == null) return; 
             _hoverSquare = square;
 
             if (_hoverSquare != null && _hoverSquare.Visual != null)
                 _hoverSquare.Visual.SetHover(true);
 
-            HoveredSquareChanged(); 
+            HoveredSquareChanged(lastSquare); 
         }
     }
 
-    void HoveredSquareChanged()
+    void HoveredSquareChanged(GridSquare lastSquare)
     {
         if (Input.GetMouseButton(0) && _drawingPath && !_isPlaying)
         {
-            if (Board.GetOrthogonalNeighbours(_activePath.LastNode).Contains(_hoverSquare))
+            if (_hoverSquare.Element == "0") return; 
+            if (_activePath.LastNode == null) return; 
+            if (Board.GetOrthogonalNeighbours(_activePath.LastNode.Square).Contains(_hoverSquare))
             {
-                
-                if (_activePath.Nodes.Contains(_hoverSquare)) return; 
-                _activePath.Nodes.Add(_hoverSquare);
+                //Erase if retracing steps 
+                if(_activePath.Nodes.Count > 1 && _hoverSquare == _activePath.SecondLast.Square)
+                {
+                    _activePath.RemoveNodeFrom(_activePath.LastNode.Square);
+                    _activePath.PathBundle.UpdatePath(_activePath);
+                    return; 
+                }
+
+                //Don't draw over previous line
+                if (_activePath.Nodes.Any(n => n.Square == _hoverSquare))
+                {
+                    return;
+                }
+
+                _activePath.AddNode(_hoverSquare);
                 _activePath.PathBundle.UpdatePath(_activePath);
+            }
+            else
+            {
+                _drawingPath = false; 
             }
         }
     }
@@ -323,13 +422,15 @@ public class BoardManager : Singleton<BoardManager>
         int numGoalsSatisfied = 0; 
         foreach (GridSquare square in Board.Cells.Values)
         {
-            if(square.SquareType == GridSqaureType.GOAL && square.bundle != null)
+            if(square.SquareType == GridSqaureType.GOAL && square.Bundles.Count > 0)
             {
-                if(square.bundle.BundleData.Time == square.GoalValue)
+                foreach(TimeBundle tb in square.Bundles)
                 {
-                    Debug.Log(square.GoalValue);
-                    Debug.Log(square.bundle.BundleData.Time);
-                    numGoalsSatisfied += 1; 
+                    if (tb.Alive == false) continue;
+                    if (tb.BundleData.Time == square.GoalValue)
+                    {
+                        numGoalsSatisfied += 1;
+                    }
                 }
             }
         }
